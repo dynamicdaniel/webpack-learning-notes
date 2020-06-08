@@ -241,14 +241,97 @@ webpack 插件 **`webpack-bundle-analyzer`**
   - 减少用户感知的加载时间
   - 提升流畅度
 
-#### 缩小文件搜索范围
-  **搜索的过程：**
-  1.从**入口entry**开始，找出文件中的**导入语句**，在递归解析
+####  5.1.1 缩小文件搜索范围
+  搜索的过程：
+ 从入口entry开始，找出文件中的**导入语句**，在递归解析
+
   > 根据文件中的导入语句，找到对应的文件，然后根据**文件后缀**，使用配置的**loader**处理文件，减少这个过程，可以提高构建速度
 
-  &emsp;提高以上工作的效率，有以下解决方案：<br />
-  &emsp;&emsp;1.优化loader配置
+  &emsp;提高以上工作的效率，有以下解决方案：
 
+**优化loader配置**
+优化命中loader的规则，有三个可选配置，test、include、exclude，可以通过 include 命中需要处理的文件。test 中的正则，以实际情况为准，例如，项目源码中只有 js，则正则不要写成 jsx?，提升正则的性能。例如：
 
+```javascript
+module.exports = {
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        include: path.resolve(__dirname, 'src')
+                        options: {
+                            presets: [
+                                '@babel/preset-env'
+                            ],
+                			cacheDirectory: true
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
 
+**优化 resolve.modules 配置**
+
+resolve.modules 用于查找第三方模块，默认值是 node_modules，查找过程如下：
+
+> 从当前目录的 node_modules 目录下查找，如果没有，去上一级查找，直到全局，根据这个规则，我们可以写明第三方模块的绝对路径，以减少查询
+
+```javascript
+module.exports = {
+    resolve: {
+        modules: path.resolve(__dirname, 'node_modules')
+    }
+}
+```
+
+**优化 resolve.mainFields 配置**
+
+该属于用于配置第三方模块使用哪个**入口文件**，在第三方模块的package.json文件中，有多个描述入口文件的字段，因为不同环境，需要的代码不同，根据target环境的不同，会以此查找可用的入口文件，例如：target = web / webworker 时，mainFields 的值是 ['borwser', 'module', 'main']，target 为其他情况时，值为 ['module', 'main']，为了减少搜索步骤，可以直接将 mainFields 设置为 ['main']，但是只要有一个模块找不到入口，可能会导致构建出的代码无法运行。
+
+**优化 resolve.alias 配置**
+
+一些第三方模块，例如 react ，会有两套代码，一套是直接可运行的最小化代码，一套是带检查警告的代码，还有一套是模块化代码，文件都在lib下面， 入口文件package.json中指定的react.js。我们可以使用可运行的开发代码
+
+```javascript
+module.exports = {
+    resolve: {
+        alias: {
+            'react': path.resolve(__dirname, './node_modules/react/dist/react.js')
+        }
+    }
+}
+```
+
+**<font color=red>参阅书籍资料是2018年的，react已经不是上面的样子了，这边的配置可以理解学习下，没有实际作用了，_<font color=dodgerblue>而且该方式的优化会影响 tree-shaking （基于es6模块化规范的实现）</font>_</font>**
+
+**优化 resolve.extensions 配置**
+
+这个配置可以使我们在引入文件时不带配置中的文件后缀，如果配置多了，会对查询速度产生可能的影响，原则：
+
+频率高的放前面，没有的别配置，如果没必要可以不要配
+
+**优化 module.noParse 配置**
+
+忽略有导入机制的模块，例如 jquery 、lodash， 可以使用函数或者正则
+
+**使用 DllPlugin**
+
+需要完成的事情：
+
+> - 将网页依赖的基础模块抽离出来，打包到一个个单独的动态链接库中。一个动态链接库中可以包含多个模块。
+> - 当需要导入的模块存在于某个动态链接库中时，这个模块不能被再次打包，而是从动态链接库中获取。
+> - 页面依赖的所有动态链接库需要被加载。
+
+动态链接库只需要被编译一次，构建过程中，动态链接库中的模块不会被重新编译，所以能大大提升构建速度。
+
+- DllPlugin 插件：打包出动态链接库文件。
+- DllReferencePlugin: 用于在配置文件中引入 DllPlugin 插件打包好的动态链接库文件。
+
+> 需要在独立的webpack配置中使用
 
