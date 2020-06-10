@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "analyzer": "cross-env NODE_ENV=env webpack --config webpack.config.analyzer.js"
+    "analyzer": "cross-env NODE_ENV=env webpack --config webpack.config.analyzer.js",
+    "start": "webpack --config webpack.config.dev.js"
   },
   "dependencies": {
     "moment": "^2.26.0",
