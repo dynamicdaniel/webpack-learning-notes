@@ -335,3 +335,8 @@ module.exports = {
 
 > 需要在独立的webpack配置中使用
 
+### 5.2 生产打包优化
+
+> 在 webpack v3 中，涉及到的插件列表：
+> - common-chunks-webpack-plugin： 用于拆分代码，使变更频率不大的代码，在浏览器端能长期缓存，而业务代码保持更新。拆分代码后，也容易做进一步的优化。
+> - chunk-manifest-webpack-plugin： 通过产出一个json文件，通过chunk ids 映射到最终文件（可能因为内容变化，导致 hash 值变化，但类似 webpack runtime 代码实际是不变的）

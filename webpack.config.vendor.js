@@ -8,6 +8,7 @@ module.exports = {
     react: ['react', 'react-dom'],
     // 将项目需要的所有polyfill 放到一个单独的动态链接库中
     // polyfill: ['core-js/fn/object/assign', 'core-js/fn/promise', 'whatwg-fetch'],
+    vendor: ['moment']
   },
   output: {
     // 输出的动态链接库的文件名称，[name]代表当前动态链接库的名称，

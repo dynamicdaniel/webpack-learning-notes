@@ -7,7 +7,8 @@ const baseConfig = require('./webpack.config.base.js')
 const vendorConfig = require('./webpack.config.vendor.js')
 const webpack = require('webpack')
 const { DllReferencePlugin } = webpack
-module.exports = new Promise((resolve, reject) => {
+
+module.exports = () => new Promise((resolve, reject) => {
   let hasManifest = fs.existsSync('./dist/react.manifest.json')
   let config = () => webpackMerge({
     devtool: 'source-map',
