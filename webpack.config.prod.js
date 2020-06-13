@@ -31,6 +31,5 @@ module.exports = webpackMerge({
       manifestVariable: 'webpackManifest',
       inlineManifest: true
     }),
-    // new WebpackManifestPlugin()
   ]
 }, baseConfig)
