@@ -9,7 +9,7 @@
     "build": "webpack --config webpack.config.prod.js"
   },
   "dependencies": {
-    "moment": "^2.26.0",
+    "moment": "^2.29.2",
     "moment-recur": "^1.0.7"
   },
   "devDependencies": {
